@@ -178,8 +178,14 @@ function retry(func, attempts) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
+function logger(func, logFunc) {
+  return function log(...params) {
+    const str = params.map((item) => JSON.stringify(item)).join(',');
+    logFunc(`${func.name}(${str}) starts`);
+    const result = func(...params);
+    logFunc(`${func.name}(${str}) ends`);
+    return result;
+  };
 }
 
 /**
@@ -195,8 +201,15 @@ function logger(/* func, logFunc */) {
  *   partialUsingArguments(fn, 'a','b','c')('d') => 'abcd'
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
-function partialUsingArguments(/* fn, ...args1 */) {
-  throw new Error('Not implemented');
+function partialUsingArguments(fn, ...args1) {
+  return function curried(...args) {
+    if (args.length + args1.length >= fn.length) {
+      return fn(...args1, ...args);
+    }
+    return function inCarried(...args2) {
+      return curried(args1.concat(args2));
+    };
+  };
 }
 
 /**
@@ -216,8 +229,12 @@ function partialUsingArguments(/* fn, ...args1 */) {
  *   getId4() => 7
  *   getId10() => 11
  */
-function getIdGeneratorFunction(/* startFrom */) {
-  throw new Error('Not implemented');
+function getIdGeneratorFunction(startFrom) {
+  let count = startFrom - 1;
+  return function id() {
+    count += 1;
+    return count;
+  };
 }
 
 module.exports = {
